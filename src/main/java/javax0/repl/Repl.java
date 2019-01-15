@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static javax0.repl.CommandDefinition.Builder.kw;
+import static javax0.repl.CommandDefinitionBuilder.kw;
 
 public class Repl implements Runnable {
     private static final boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
@@ -21,9 +21,13 @@ public class Repl implements Runnable {
     private boolean debugMode = false;
 
     public Repl() {
-        command(kw("alias").executor(this::aliasCommand).usage("alias myalias command"))
-                .command(kw("exit").executor(this::exitCommand).usage("exit"))
-                .command(kw("help").executor(this::helpCommand).parameters(Set.of()).usage("help"));
+        command(kw("alias").executor(this::aliasCommand).usage("alias myalias command")
+                .help("You can freely define aliases for any command.\n" +
+                        "You cannot define alias to an alias.")
+        ).command(kw("exit").executor(this::exitCommand).usage("exit")
+                .help("Use the command 'exit' without parameters to exit from the REPL application")
+        ).command(kw("help").executor(this::helpCommand).parameters(Set.of()).usage("help")
+        );
     }
 
     private static Process getOsProcessObject(String s) throws IOException {
@@ -65,8 +69,15 @@ public class Repl implements Runnable {
         return this;
     }
 
-    public Repl command(CommandDefinition.Builder builder) {
-        commandDefinitions.add(builder.build());
+    public Repl command(CommandDefinitionBuilder builder) {
+        final var def = builder.build();
+        for( final var cd : commandDefinitions ){
+            if( cd.keyword.toLowerCase().equals(def.keyword.toLowerCase())){
+                commandDefinitions.remove(cd);
+                break;
+            }
+        }
+        commandDefinitions.add(def);
         return this;
     }
 
@@ -124,6 +135,8 @@ public class Repl implements Runnable {
             commandDefinitions.forEach(
                     c -> env.console().writer().print(c.usage + "\n")
             );
+            env.console().writer().print("! cmd to execute shell commands\n");
+            env.console().writer().print(". filename to execute the content of the file\n");
         }
 
     }

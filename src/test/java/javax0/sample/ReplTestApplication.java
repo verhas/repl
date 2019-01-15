@@ -3,16 +3,16 @@ package javax0.sample;
 import javax0.repl.CommandEnvironment;
 import javax0.repl.Repl;
 
-import static javax0.repl.CommandDefinition.Builder.kw;
+import static javax0.repl.CommandDefinitionBuilder.kw;
 
 class ReplTestApplication {
 
     public static void main(String[] args) {
         new ReplTestApplication().test();
     }
-
+private Repl sut;
     private void test() {
-        final var sut = new Repl();
+        sut = new Repl();
         sut
                 .command(kw("echo").executor(this::echoCommand).usage("echo parameters")
                         .help("Use echo to print out to the console the parameters that are given on the line")
@@ -30,7 +30,11 @@ class ReplTestApplication {
                                 "You can specify the complex number in a+bi format or\n" +
                                 "R(rad) format.")
 
-                ).debug()
+                )
+                .command(kw("alias").executor(this::myAlias))
+                .title("Sample REPL Application to end-to-end manual test the application")
+                .prompt("REPL > $ ")
+                .debug()
                 .run()
         ;
     }
@@ -47,6 +51,14 @@ class ReplTestApplication {
         }
     }
 
+    private void myAlias(CommandEnvironment env) {
+        env.console().writer().print("This is my alias!!!\n");
+        env.console().writer().flush();
+        final var alias = env.parser().get(0);
+        final var command = env.parser().get(1);
+        sut.alias(alias, command);
+        env.message().info(alias + " was really set to alias " + command);
+    }
     private void returnCommand(CommandEnvironment env) {
 
     }
