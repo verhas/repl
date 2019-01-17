@@ -3,6 +3,8 @@ package javax0.repl;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -19,12 +21,15 @@ public class Repl implements Runnable {
     private String startupFile;
     private String prompt = "$ ";
     private boolean debugMode = false;
+    private Consumer<CommandEnvironment> stateReporter;
+    private Function<CommandEnvironment, Boolean> allowExit;
 
     public Repl() {
         command(kw("alias").executor(this::aliasCommand).usage("alias myalias command")
                 .help("You can freely define aliases for any command.\n" +
                         "You cannot define alias to an alias.")
-        ).command(kw("exit").executor(this::exitCommand).usage("exit")
+        ).command(kw("*exit") // it starts with '*', user cannot abbreviate
+                .parameter("confirm").executor(this::exitCommand).usage("exit")
                 .help("Use the command 'exit' without parameters to exit from the REPL application")
         ).command(kw("help").executor(this::helpCommand).parameters(Set.of()).usage("help")
         );
@@ -71,8 +76,8 @@ public class Repl implements Runnable {
 
     public Repl command(CommandDefinitionBuilder builder) {
         final var def = builder.build();
-        for( final var cd : commandDefinitions ){
-            if( cd.keyword.toLowerCase().equals(def.keyword.toLowerCase())){
+        for (final var cd : commandDefinitions) {
+            if (cd.keyword.toLowerCase().equals(def.keyword.toLowerCase())) {
                 commandDefinitions.remove(cd);
                 break;
             }
@@ -98,7 +103,6 @@ public class Repl implements Runnable {
     }
 
     private LocalConsole getConsole() {
-        LocalConsole console;
         if (System.console() == null) {
             message.warning("No console in the system");
             return new BufferedReaderConsole();
@@ -108,41 +112,67 @@ public class Repl implements Runnable {
     }
 
     private void exitCommand(CommandEnvironment env) {
-        shouldExit.set(true);
+        if (allowExit != null && !allowExit.apply(env)) {
+            if (env.parser().get("confirm", Set.of("yes")) != null) {
+                shouldExit.set(true);
+            } else {
+                env.message().warning("There is unsaved state in the application. Use 'exit confirm=yes'");
+            }
+        } else {
+            shouldExit.set(true);
+        }
     }
 
     private void helpCommand(CommandEnvironment env) {
+        final var w = env.console().writer();
         if (env.parser().get(0) != null) {
             final var command = env.parser().get(0);
             if (aliases.containsKey(command.toLowerCase())) {
-                env.console().writer().print(command + " is an alias of " + aliases.get(command.toLowerCase()) + "\n");
+                w.print(command + " is an alias of " + aliases.get(command.toLowerCase()) + "\n");
                 return;
             }
             final var fakeEnv = new ReplCommandEnvironment();
             keywordAndLine(fakeEnv, command);
             final var cd = getCommand(fakeEnv);
             if (cd == null) {
-                env.console().writer().print(command + " is unknown");
+                w.print(command + " is unknown");
                 return;
             }
             if (cd.help == null) {
-                env.console().writer().print("There is no help defined for the command " + cd.keyword + "\n");
+                w.print("There is no help defined for the command " + cd.keyword + "\n");
             } else {
-                env.console().writer().print(cd.help + "\n");
+                w.print(cd.usage + "\n");
+                w.print(cd.help + "\n");
             }
         } else {
-            env.console().writer().print("Available commands:\n");
+            w.print("Available commands:\n");
             commandDefinitions.forEach(
-                    c -> env.console().writer().print(c.usage + "\n")
+                    c -> w.print(c.usage + "\n")
             );
-            env.console().writer().print("! cmd to execute shell commands\n");
-            env.console().writer().print(". filename to execute the content of the file\n");
+            w.print("! cmd to execute shell commands\n");
+            w.print(". filename to execute the content of the file\n");
+            if (!aliases.isEmpty()) {
+                w.print("Aliases:\n");
+                aliases.keySet().forEach(
+                        s -> w.print(s + " -> " + aliases.get(s) + "\n")
+                );
+            }
         }
-
+        w.flush();
     }
 
     public Repl alias(String alias, String command) {
         aliases.put(alias, command);
+        return this;
+    }
+
+    public Repl stateReporter(Consumer<CommandEnvironment> stateReporter) {
+        this.stateReporter = stateReporter;
+        return this;
+    }
+
+    public Repl allowExit(Function<CommandEnvironment, Boolean> allowExit) {
+        this.allowExit = allowExit;
         return this;
     }
 
@@ -197,18 +227,20 @@ public class Repl implements Runnable {
 
     public void run() {
         final LocalConsole console = getConsole();
-        console.writer().print(fetchMessage());
+        final var w = console.writer();
+        w.print(fetchMessage());
         if (args != null && args.length > 0) {
             execFile(args[0], console);
             return;
         }
         if (appTitle != null) {
-            console.writer().print(appTitle);
+            w.print(appTitle);
         }
-        console.writer().print("CDW is " + new File(".").getAbsolutePath() + "\n");
-        console.writer().print("type 'help' for help\n");
-        console.writer().flush();
+        w.print("\nCDW is " + new File(".").getAbsolutePath() + "\n");
+        w.print("type 'help' for help\n");
         executeStartupFile(console);
+        w.print(fetchMessage());
+        w.flush();
         for (; ; ) {
             final var rawLine = console.readLine(prompt);
             if (rawLine == null) {
@@ -225,7 +257,7 @@ public class Repl implements Runnable {
             }
             if (line.startsWith("!")) {
                 shell(line.substring(1), console);
-                console.writer().flush();
+                w.flush();
                 continue;
             }
             try {
@@ -236,10 +268,10 @@ public class Repl implements Runnable {
                 if (debugMode) {
                     e.printStackTrace();
                 }
-                console.writer().print("[EXCEPTION] " + e);
+                w.print("[EXCEPTION] " + e);
             }
-            console.writer().print(fetchMessage());
-            console.writer().flush();
+            w.print(fetchMessage());
+            w.flush();
             if (shouldExit.get()) {
                 return;
             }
@@ -254,7 +286,7 @@ public class Repl implements Runnable {
                 console.writer().print("Executing startup file " + file.getAbsolutePath());
                 execFile(file.getAbsolutePath(), console);
             } else {
-                console.writer().print("Startup file " + startupFile + " was not found");
+                console.writer().print("Startup file " + startupFile + " was not found.\n");
             }
         }
     }
@@ -279,11 +311,22 @@ public class Repl implements Runnable {
         } else {
             message.error("None of the syntax patterns could match the line. See the help of the command.");
         }
+        if (stateReporter != null) {
+            stateReporter.accept(env);
+        }
+    }
+
+    private boolean kwMatch(CommandDefinition cd, String kw) {
+        if (cd.keyword.startsWith("*")) {
+            return cd.keyword.substring(1).toLowerCase().equals(kw);
+        }
+        return cd.keyword.toLowerCase().startsWith(kw);
     }
 
     private CommandDefinition getCommand(ReplCommandEnvironment env) {
+        final var kw = env.keyword().toLowerCase();
         final var commands = commandDefinitions.stream()
-                .filter(command -> command.keyword.toLowerCase().startsWith(env.keyword()))
+                .filter(command -> kwMatch(command, kw))
                 .collect(Collectors.toList());
         if (commands.size() > 1) {
             message.error("command '" + env.keyword() + "' is ambiguous");
