@@ -22,14 +22,13 @@ public class CommandDefinitionBuilderFluenter {
 
     public static FluentBuilder sourceBuilderGrammar() {
         var klass = FluentBuilder.from(CommandDefinitionBuilder.class);
-        var grammar = klass
+        return klass
             .one("kw")
             .optional(klass.oneOf(klass.one("noParameters"), klass.one("parameters"), klass.oneOrMore("parameter")))
-            .optional("regex")
+            .zeroOrMore("regex")
             .optional("usage")
             .optional("help")
-            .one("executor");
-
-        return grammar;
+            .one("executor").name("CommandDefinitionBuilderReady")
+            .one("build");
     }
 }

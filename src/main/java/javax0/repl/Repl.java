@@ -1,5 +1,7 @@
 package javax0.repl;
 
+import javax0.repl.CommandDefinitionBuilder.CommandDefinitionBuilderReady;
+
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -25,17 +27,20 @@ public class Repl implements Runnable {
     private Function<CommandEnvironment, Boolean> allowExit;
 
     public Repl() {
-
         command(start().kw("alias")
             .usage("alias myalias command")
             .help("You can freely define aliases for any command.\n" +
                 "You cannot define alias to an alias.")
             .executor(this::aliasCommand)
         ).command(start().kw("*exit") // it starts with '*', user cannot abbreviate
-            .parameter("confirm").executor(this::exitCommand)
+            .parameter("confirm")
             .usage("exit")
             .help("Use the command 'exit' without parameters to exit from the REPL application")
-        ).command(start().kw("help").executor(this::helpCommand).parameters(Set.of()).usage("help")
+            .executor(this::exitCommand)
+        ).command(start().kw("help")
+            .parameters(Set.of())
+            .usage("help")
+            .executor(this::helpCommand)
         );
     }
 
@@ -78,7 +83,7 @@ public class Repl implements Runnable {
         return this;
     }
 
-    public Repl command(CommandDefinitionBuilder builder) {
+    public Repl command(CommandDefinitionBuilderReady builder) {
         final var def = builder.build();
         for (final var cd : commandDefinitions) {
             if (cd.keyword.toLowerCase().equals(def.keyword.toLowerCase())) {
