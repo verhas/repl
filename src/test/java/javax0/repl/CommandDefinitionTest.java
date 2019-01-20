@@ -6,13 +6,12 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static javax0.repl.CommandDefinitionBuilder.kw;
-
 class CommandDefinitionTest {
 
     @Test
     @DisplayName("Test the fluent API of command definition")
     void testCommandDefinition() {
+        /*
         kw("echo").executor(this::echoCommand).usage("echo parameters")
                 .help("Use echo to print out to the console the parameters that are given on the line")
                 .noParameters().build();
@@ -34,6 +33,7 @@ class CommandDefinitionTest {
                 .help("Print out the absolut value of a complex number\n" +
                         "You can specify the complex number in a+bi format or\n" +
                         "R(rad) format.").build();
+                        */
 
     }
 

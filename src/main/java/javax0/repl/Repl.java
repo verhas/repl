@@ -8,7 +8,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static javax0.repl.CommandDefinitionBuilder.kw;
+import static javax0.repl.CommandDefinitionBuilder.start;
 
 public class Repl implements Runnable {
     private static final boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
@@ -25,13 +25,17 @@ public class Repl implements Runnable {
     private Function<CommandEnvironment, Boolean> allowExit;
 
     public Repl() {
-        command(kw("alias").executor(this::aliasCommand).usage("alias myalias command")
-                .help("You can freely define aliases for any command.\n" +
-                        "You cannot define alias to an alias.")
-        ).command(kw("*exit") // it starts with '*', user cannot abbreviate
-                .parameter("confirm").executor(this::exitCommand).usage("exit")
-                .help("Use the command 'exit' without parameters to exit from the REPL application")
-        ).command(kw("help").executor(this::helpCommand).parameters(Set.of()).usage("help")
+
+        command(start().kw("alias")
+            .usage("alias myalias command")
+            .help("You can freely define aliases for any command.\n" +
+                "You cannot define alias to an alias.")
+            .executor(this::aliasCommand)
+        ).command(start().kw("*exit") // it starts with '*', user cannot abbreviate
+            .parameter("confirm").executor(this::exitCommand)
+            .usage("exit")
+            .help("Use the command 'exit' without parameters to exit from the REPL application")
+        ).command(start().kw("help").executor(this::helpCommand).parameters(Set.of()).usage("help")
         );
     }
 
@@ -39,10 +43,10 @@ public class Repl implements Runnable {
         final Process process;
         if (isWindows) {
             process = Runtime.getRuntime()
-                    .exec(String.format("cmd.exe /c %s", s));
+                .exec(String.format("cmd.exe /c %s", s));
         } else {
             process = Runtime.getRuntime()
-                    .exec(String.format("sh -c %s", s));
+                .exec(String.format("sh -c %s", s));
         }
         return process;
     }
@@ -147,14 +151,14 @@ public class Repl implements Runnable {
         } else {
             w.print("Available commands:\n");
             commandDefinitions.forEach(
-                    c -> w.print(c.usage + "\n")
+                c -> w.print(c.usage + "\n")
             );
             w.print("! cmd to execute shell commands\n");
             w.print(". filename to execute the content of the file\n");
             if (!aliases.isEmpty()) {
                 w.print("Aliases:\n");
                 aliases.keySet().forEach(
-                        s -> w.print(s + " -> " + aliases.get(s) + "\n")
+                    s -> w.print(s + " -> " + aliases.get(s) + "\n")
                 );
             }
         }
@@ -326,8 +330,8 @@ public class Repl implements Runnable {
     private CommandDefinition getCommand(ReplCommandEnvironment env) {
         final var kw = env.keyword().toLowerCase();
         final var commands = commandDefinitions.stream()
-                .filter(command -> kwMatch(command, kw))
-                .collect(Collectors.toList());
+            .filter(command -> kwMatch(command, kw))
+            .collect(Collectors.toList());
         if (commands.size() > 1) {
             message.error("command '" + env.keyword() + "' is ambiguous");
             return null;

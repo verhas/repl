@@ -3,16 +3,17 @@ package javax0.sample;
 import javax0.repl.CommandEnvironment;
 import javax0.repl.Repl;
 
-import static javax0.repl.CommandDefinitionBuilder.kw;
-
 class ReplTestApplication {
 
     public static void main(String[] args) {
         new ReplTestApplication().test();
     }
-private Repl sut;
+
+    private Repl sut;
+
     private void test() {
         sut = new Repl();
+        /*
         sut
                 .command(kw("echo").executor(this::echoCommand).usage("echo parameters")
                         .help("Use echo to print out to the console the parameters that are given on the line")
@@ -36,7 +37,7 @@ private Repl sut;
                 .prompt("REPL > $ ")
                 .debug()
                 .run()
-        ;
+        ;*/
     }
 
     private void absCommand(CommandEnvironment env) {
@@ -59,6 +60,7 @@ private Repl sut;
         sut.alias(alias, command);
         env.message().info(alias + " was really set to alias " + command);
     }
+
     private void returnCommand(CommandEnvironment env) {
 
     }
