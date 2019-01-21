@@ -19,8 +19,7 @@ public class CommandDefinitionBuilder {
     private String help;
 
     public void kw(String keyword) {
-        final var it = new CommandDefinitionBuilder();
-        it.keyword = keyword;
+        this.keyword = keyword;
     }
 
     public CommandDefinition build() {
