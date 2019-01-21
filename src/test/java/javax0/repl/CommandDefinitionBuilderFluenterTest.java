@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import static javax0.geci.api.Source.maven;
 
-public class CommandDefinitionBuilderFluenter {
+public class CommandDefinitionBuilderFluenterTest {
 
 
     @Test

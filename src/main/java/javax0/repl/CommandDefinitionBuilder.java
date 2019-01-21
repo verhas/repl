@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
-@Geci("fluent definedBy='javax0.repl.CommandDefinitionBuilderFluenter::sourceBuilderGrammar'")
+@Geci("fluent definedBy='javax0.repl.CommandDefinitionBuilderFluenterTest::sourceBuilderGrammar'")
 public class CommandDefinitionBuilder {
     private String keyword;
     private Set<String> parameters;
@@ -18,29 +18,29 @@ public class CommandDefinitionBuilder {
     private String usage;
     private String help;
 
-    private void kw(String keyword) {
+    public void kw(String keyword) {
         final var it = new CommandDefinitionBuilder();
         it.keyword = keyword;
     }
 
-    private CommandDefinition build() {
+    public CommandDefinition build() {
         return new CommandDefinition(keyword, parameters, executor, regexes, usage, help);
     }
 
-    private CommandDefinitionBuilder executor(Consumer<CommandEnvironment> executor) {
+    public CommandDefinitionBuilder executor(Consumer<CommandEnvironment> executor) {
         this.executor = executor;
         return this;
     }
 
-    private void usage(String usage) {
+    public void usage(String usage) {
         this.usage = usage;
     }
 
-    private void help(String help) {
+    public void help(String help) {
         this.help = help;
     }
 
-    private void parameters(Set<String> parameters) {
+    public void parameters(Set<String> parameters) {
         if (this.parameters == null) {
             this.parameters = new HashSet<>(parameters);
         } else {
@@ -48,7 +48,7 @@ public class CommandDefinitionBuilder {
         }
     }
 
-    private void noParameters() {
+    public void noParameters() {
         if (parameters == null) {
             this.parameters = new HashSet<>(Set.of());
         } else {
@@ -57,7 +57,7 @@ public class CommandDefinitionBuilder {
         }
     }
 
-    private void parameter(String parameter) {
+    public void parameter(String parameter) {
         if (parameters == null) {
             this.parameters = new HashSet<>(Set.of(parameter));
         } else {
@@ -65,7 +65,7 @@ public class CommandDefinitionBuilder {
         }
     }
 
-    private void regex(String name, String regex) {
+    public void regex(String name, String regex) {
         if (regexes == null) {
             this.regexes = new HashMap<>();
         }
@@ -123,10 +123,10 @@ public class CommandDefinitionBuilder {
     public interface If0 {
         CommandDefinitionBuilderReady executor(java.util.function.Consumer<javax0.repl.CommandEnvironment> arg1);
     }
-    public interface If1 extends If0 {
+    public interface If1 {
         If0 help(String arg1);
     }
-    public interface If2 extends If1 {
+    public interface If2 {
         If1 usage(String arg1);
     }
     public interface If3 extends If2 {

@@ -5,10 +5,10 @@ import javax0.repl.Repl;
 
 import static javax0.repl.CommandDefinitionBuilder.start;
 
-class ReplTestApplication {
+class ReplTestApplicationTest {
 
     public static void main(String[] args) {
-        new ReplTestApplication().test();
+        new ReplTestApplicationTest().test();
     }
 
     private Repl sut;
@@ -41,7 +41,7 @@ class ReplTestApplication {
                     "R(rad) format.")
                 .executor(this::absCommand)
             )
-            .command(start().kw("alias").executor(this::myAlias))
+            .command(start().kw("alias").usage("").help("").executor(this::myAlias))
             .title("Sample REPL Application to end-to-end manual test the application")
             .prompt("REPL > $ ")
             .debug()

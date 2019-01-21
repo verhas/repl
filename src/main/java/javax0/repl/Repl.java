@@ -40,6 +40,7 @@ public class Repl implements Runnable {
         ).command(start().kw("help")
             .parameters(Set.of())
             .usage("help")
+                .help("")
             .executor(this::helpCommand)
         );
     }
