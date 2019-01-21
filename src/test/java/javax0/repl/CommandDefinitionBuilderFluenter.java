@@ -26,8 +26,8 @@ public class CommandDefinitionBuilderFluenter {
             .one("kw")
             .optional(klass.oneOf(klass.one("noParameters"), klass.one("parameters"), klass.oneOrMore("parameter")))
             .zeroOrMore("regex")
-            .optional("usage")
-            .optional("help")
+            .one("usage")
+            .one("help")
             .one("executor").name("CommandDefinitionBuilderReady")
             .one("build");
     }
