@@ -26,9 +26,8 @@ public class CommandDefinitionBuilder {
         return new CommandDefinition(keyword, parameters, executor, regexes, usage, help);
     }
 
-    public CommandDefinitionBuilder executor(Consumer<CommandEnvironment> executor) {
+    public void executor(Consumer<CommandEnvironment> executor) {
         this.executor = executor;
-        return this;
     }
 
     public void usage(String usage) {
