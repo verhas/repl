@@ -16,38 +16,43 @@ class ReplTestApplicationTest {
     private void test() {
         sut = new Repl();
         sut.command(
-            start().
-                kw("echo")
-                .noParameters()
-                .usage("echo parameters")
-                .help("Use echo to print out to the console the parameters that are given on the line")
-                .executor(this::echoCommand)
+                start().
+                        kw("echo")
+                        .usage("echo parameters")
+                        .help("Use echo to print out to the console the parameters that are given on the line")
+                        .executor(this::echoCommand)
         ).alias("e", "echo")
-            .command(
-                start()
-                    .kw("return")
-                    .parameter("immediate").parameter("delayed").parameter("format")
-                    .usage("return value")
-                    .help("Use return to calculate a value and return it to the console.")
-                    .executor(this::returnCommand)
-            ).alias("ret", "return").alias("a", "alias")
-            .command(start().
-                kw("abs")
-                .regex("canonical", "(\\d+)\\s*\\+(\\d+)i")
-                .regex("polar", "(\\d+)\\((\\d+\\.?\\d*)\\)")
-                .usage("abs complexnumber")
-                .help("Print out the absolut value of a complex number\n" +
-                    "You can specify the complex number in a+bi format or\n" +
-                    "R(rad) format.")
-                .executor(this::absCommand)
-            )
-            .command(start().kw("alias").usage("").help("").executor(this::myAlias))
-            .title("Sample REPL Application to end-to-end manual test the application")
-            .prompt("REPL > $ ")
-            .debug()
-            .run()
+                .command(
+                        start()
+                                .kw("return")
+                                .parameter("immediate").parameter("delayed").parameter("format")
+                                .usage("return value")
+                                .help("Use return to calculate a value and return it to the console.")
+                                .executor(this::returnCommand)
+                ).alias("ret", "return").alias("a", "alias")
+                .command(start().
+                        kw("abs")
+                        .regex("canonical", "(\\d+)\\s*\\+(\\d+)i")
+                        .regex("polar", "(\\d+)\\((\\d+\\.?\\d*)\\)")
+                        .usage("abs complexnumber")
+                        .help("Print out the absolut value of a complex number\n" +
+                                "You can specify the complex number in a+bi format or\n" +
+                                "R(rad) format.")
+                        .executor(this::absCommand)
+                )
+                .command(start().kw("alias").usage("").help("").executor(this::myAlias))
+                .title("Sample REPL Application to end-to-end manual test the application")
+                .prompt("REPL > $ ")
+                .stateReporter(this::report)
+                .debug()
+                .run()
         ;
     }
+
+    private void report(CommandEnvironment env) {
+
+    }
+
 
     private void absCommand(CommandEnvironment env) {
         if (env.matcherId().equals("polar")) {
