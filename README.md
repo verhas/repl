@@ -63,6 +63,12 @@ The code creates a new `Repl` object that implements the configuration API. In t
 * `stateReporter()` can specify a `Consumer<CommandEnvironment>` that is supposed to print a message to the console
   about the state of the application. This is a method that has exactly the same interface as any other command
   method, except this is not configured as a command, but rather invoked after every and each command execution.
+* `allowExit()` may define a `Function<CommandEnvironment,Boolean>` that will be invoked by the REPL application when
+  the user executes the `exit` command.
+* `startup()` can be used to define a startup file. This file will be read by the REPL application if it exists and the
+  lines will be executed by the application like if they were typed into the command input. This functionality is handy
+  to let the user of the REPL application to have his/her own startup file defining aliases or doing some application
+  specific state initialization. 
 * `debug()` switches on debug mode. In this mode when an exception happens in some of the commands the full exception
   with the stacktrace is printed on the console.
 * `run()` starts the console. This method returns only when the user exists the application.
@@ -79,6 +85,10 @@ This has to be followed with the keyword definition calling the methof `kw()`. T
 call chain. Every command has to have a unique command keyword. This is the keyword that the users should type
 at the start of the line. Note that users are required to type in only that many characters as many makes the
 command unique, thus there is no reason to be afraid to define long command names.
+
+When a command name is defined with the `*` as the first character then the REPL application will not recognize
+the command in abbreviated form. This is to ensure that "dangerous" commands, like `exit` are not executed
+accidentally.
 
 ##Parameter definition
 
@@ -138,5 +148,79 @@ command methods.
 The REPL application implements some commands that are the same for all REPL applications. These are the followings:
 
 * `help` to display help
-* `exit` to //TODO
+* `exit` to exit the application
+* `.` (dot) to execute commands from a file like the lines of the file were typed by the user
+* `!` (exclamation mark) to execute shell commands (except `cd`)
+* `alias` to define aliases for commands
+
+## `help` showing help
+
+The command help will display the usage strings of all the commands or in case the user provides an argument, which
+is the name of the command possibly abbreviated then it will display the help text of that command.
+
+## `exit` the application
+
+Invoking this command will return to the `public static void main()` method, essentially exiting the application.
+Since REPL applications may store some state than may need saving the REPL application invokes the
+`Function<CommandEnvironment,Boolean>` defined as an argument to the method `allowExit()` in the setup of the
+REPL application. If this function is not defined or defined and returns `true` then the command `exit` will
+be executed. If the function is defined and returns false then a warning message is displayed and the command
+execution does not finish, the application does not finish.
+
+The warning message will inform the user to use the parameter `confirm=yes` to force the exit. If this parameter is
+used, like
+
+```
+exit confirm=yes
+```
+
+then the program will exit. The configured function is invoked even if the user uses the `confirm=yes` parameter
+this way making it possible to save the state for some implementations.
+
+## `.` execute from a file
+
+The dot command is literally a `.` dot character that can have one argument, the name of a file. This file will be read
+by the REPL application and the commands will be executed. The usual feedback messages are not displayed for each
+command as they are executed from the file. If there is an `exit` command in the file (should not, it is bad practice)
+then exiting will only be performed at the end of the execution of the file. Commands read from file cannot execute
+shell commands and cannot include other files.
+
+## `!` shell
+
+if the command line starts with the `!` exclamation mark then the rest of the line is passed to the underlying
+operating system shell to execute. This functionality was tested on Windows and on Unix like operating systems
+including OSX. This way the user can execute simple shell commands like `ls` or `dir` or rename, move around files.
+
+The user can not change the current working directory. Java does not provide functionality to change the current
+working directory of the Java process and when `cd` is executed via the shell it changes the current working directory
+of the freshly started shell process that is terminated immediately after the command was executes and thus `cd` is 
+of no use.
+
+## `alias` definition
+
+Aliases can be define during the startup of the application but there is also a command in the REPL application,
+`alias` available for the users of the application to define aliases. The syntax of the command is 
+
+```
+alias myalias command
+```
+
+After executing this command `myalias` can be used instead of `command`. When using aliases on the command line
+they cannot be abbreviated unlike the commands themselves. If the command is executed without a `command`, like
+
+```
+alias myalias
+```
+
+then the alias becomes undefined.
+
+It is a good practice to let the users define a startup file and to include their own aliases instead of hardwiring 
+aliases. The commands and startup files or files included using the dot command can any time redefine or delete any
+alias.
+
+# Command development
+
+  
+
+
  

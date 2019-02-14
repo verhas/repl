@@ -40,7 +40,7 @@ public class Repl implements Runnable {
         ).command(start().kw("help")
             .parameters(Set.of())
             .usage("help")
-                .help("")
+            .help("")
             .executor(this::helpCommand)
         );
     }
@@ -172,7 +172,11 @@ public class Repl implements Runnable {
     }
 
     public Repl alias(String alias, String command) {
-        aliases.put(alias, command);
+        if (command == null) {
+            aliases.remove(alias);
+        } else {
+            aliases.put(alias, command);
+        }
         return this;
     }
 
