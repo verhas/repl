@@ -10,6 +10,16 @@ class ReplCommandEnvironment implements CommandEnvironment {
     String matcherId;
     LocalConsole console;
     Message message;
+    final Repl repl;
+
+    ReplCommandEnvironment(Repl repl) {
+        this.repl = repl;
+    }
+
+    @Override
+    public Repl repl() {
+        return repl;
+    }
 
     @Override
     public String keyword() {

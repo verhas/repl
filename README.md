@@ -13,7 +13,7 @@
 
 # JavaDoc
 
-For reference the JavaDoc is available at https://verhas.github.io/repl/apidocs/
+For reference the JavaDoc is available at https://verhas.github.io/repl/
 
 # Getting started
 

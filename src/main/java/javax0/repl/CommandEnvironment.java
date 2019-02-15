@@ -42,4 +42,11 @@ public interface CommandEnvironment {
      * displayed to the user when the command has finished.
      */
     Message message();
+
+    /**
+     * @return the Repl object that the command is running in. It is not likely that there are many Repl objects in a
+     * single JVM? but still this is the preferred way to access the Repl object in case a command needs it. As an example
+     * a command may switch debug mode in on the Repl calling {@link Repl#debug()}.
+     */
+    Repl repl();
 }

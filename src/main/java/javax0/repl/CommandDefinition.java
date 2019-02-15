@@ -4,6 +4,9 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
+/**
+ * An object that holds all the information that defines a command.
+ */
 class CommandDefinition {
     final String keyword;
     final Set<String> parameters;
@@ -25,5 +28,4 @@ class CommandDefinition {
         this.usage = usage;
         this.help = help;
     }
-
 }

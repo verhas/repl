@@ -3,6 +3,9 @@ package javax0.repl;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A message object used by commands to collect informational, warning and error messages.
+ */
 public class Message {
     private final List<String> errors = new ArrayList<>();
     private final List<String> warnings = new ArrayList<>();

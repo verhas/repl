@@ -2,6 +2,9 @@ package javax0.repl;
 
 import java.util.*;
 
+/**
+ * A parameter parser that is to parse the command line and after that to query the command parameters.
+ */
 public class ParameterParser {
 
     private final Map<String, String> keys = new HashMap<>();

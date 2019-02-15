@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
+/**
+ * {@link LocalConsole} implementation that uses {@link System#in} and {@link System#out}
+ */
 public class BufferedReaderConsole implements LocalConsole {
     private final BufferedReader reader =
             new BufferedReader(new InputStreamReader(System.in));

@@ -9,6 +9,10 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
+/**
+ * A command definition builder that can be used to create a command definition. This is  the builder to be used to
+ * create the argument to the {@link Repl#command(CommandDefinitionBuilderReady)} method.
+ */
 @Geci("fluent definedBy='javax0.repl.CommandDefinitionBuilderFluenterTest::sourceBuilderGrammar'")
 public class CommandDefinitionBuilder {
     private String keyword;
