@@ -1,9 +1,9 @@
 Note: this documentation file is here to help the documentation of the actual REPL application, which uses this
-library. Eventually such an application want to document the commands it supports. This documentation can be
+library. Eventually, such an application want to document the commands it supports. This documentation can be
 extended copying the content of this file to include the built-in commands without writing their documentation
 again and again. 
 
-1. Search every occurence of `REPL$ >` in the text and replace it with your applications prompt.
+1. Search every occurrence of `REPL$ >` in the text and replace it with your applications prompt.
 1. Copy the changed text into your documentation!
 
 # General commands
@@ -34,9 +34,9 @@ REPL$ > help exit
 ```
 
 to get detailed help on the command `exit`. You can also get help on any other command. You can also use
-command names that are aliases. In this case the help text will tell you what command the alias stands for and in
+command names that are aliases. In this case, the help text will tell you what command the alias stands for and in
 case you need help on that command you can provide the name of that command. You can also abbreviate the name
-of the command in case the command name is abbreviatable. Note that some commands, like `exit` can not be abbreviated
+of the command in case the command name is allowed to be abbreviated. Note that some commands, like `exit` cannot be abbreviated
 for safety reason.
 
 ## `exit` the application
@@ -47,7 +47,7 @@ Use this command to exit the application, like
 REPL$ > exit
 ```
 
-It may happen that the application has some unsaved values. In this case the command will give you a warning and will
+It may happen that the application has some unsaved values. In this case, the command will give you a warning and will
 not exit. This lets you to execute the commands that save the data. If you want to force exit you have to use the
 command in the format 
 
