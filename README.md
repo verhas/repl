@@ -198,7 +198,7 @@ of no use.
 
 ## `alias` definition
 
-Aliases can be define during the startup of the application but there is also a command in the REPL application,
+Aliases can be defined during the startup of the application but there is also a command in the REPL application,
 `alias` available for the users of the application to define aliases. The syntax of the command is 
 
 ```
@@ -220,7 +220,7 @@ alias.
 
 # Command development
 
-  
+
 
 
  
