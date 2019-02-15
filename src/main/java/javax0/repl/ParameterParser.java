@@ -82,10 +82,12 @@ public class ParameterParser {
      * was not present on the command
      */
     public Optional<String> get(String key, Set<String> values) {
-        if (get(key).isEmpty()) {
+        final var value = get(key);
+        if (value.isEmpty()) {
             return Optional.empty();
+        } else {
+            return Optional.ofNullable(findIt(value.get(), values));
         }
-        return Optional.ofNullable(findIt(get(key).get(), values));
     }
 
     /**

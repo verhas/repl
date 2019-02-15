@@ -147,7 +147,7 @@ public class Repl implements Runnable {
 
     private void exitCommand(CommandEnvironment env) {
         if (allowExit != null && !allowExit.apply(env)) {
-            if (env.parser().get("confirm", Set.of("yes")) != null) {
+            if (env.parser().get("confirm", Set.of("yes")).isPresent()) {
                 shouldExit.set(true);
             } else {
                 env.message().warning("There is unsaved state in the application. Use 'exit confirm=yes'");
@@ -159,8 +159,8 @@ public class Repl implements Runnable {
 
     private void helpCommand(CommandEnvironment env) {
         final var w = env.console().writer();
-        if (env.parser().get(0) != null) {
-            final var command = env.parser().get(0).orElse(null);
+        if (env.parser().get(0).isPresent()) {
+            final var command = env.parser().get(0).get();
             if (aliases.containsKey(command.toLowerCase())) {
                 w.print(command + " is an alias of " + aliases.get(command.toLowerCase()) + "\n");
                 return;
@@ -277,9 +277,9 @@ public class Repl implements Runnable {
     }
 
     /**
-     * Define the prompt that th euser will see in the
-     * @param prompt
-     * @return
+     * Define the prompt that the user will see in the
+     * @param prompt the text of the prompt
+     * @return this
      */
     public Repl prompt(String prompt) {
         this.prompt = prompt;

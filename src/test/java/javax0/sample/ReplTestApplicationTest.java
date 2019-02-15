@@ -51,6 +51,7 @@ class ReplTestApplicationTest {
         ;
     }
 
+    @SuppressWarnings("EmptyMethod")
     private void report(CommandEnvironment env) {
 
     }
@@ -87,13 +88,13 @@ class ReplTestApplicationTest {
         }
         final var output = env.parser().get("output", Set.of("yes", "no"));
         if (output.isPresent() && output.get().equals("yes")) {
-            final var text = env.parser().getOrDefault("text","");
+            final var text = env.parser().getOrDefault("text", "");
             env.message().info(text);
         }
     }
 
     private void echoCommand(CommandEnvironment env) {
-        for (int i = 0; env.parser().get(i) != null; i++) {
+        for (int i = 0; env.parser().get(i).isPresent(); i++) {
             env.message().info(env.parser().get(i).orElse(""));
         }
     }

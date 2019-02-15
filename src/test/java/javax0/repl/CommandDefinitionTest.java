@@ -7,6 +7,7 @@ import java.util.Set;
 
 import static javax0.repl.CommandDefinitionBuilder.start;
 
+@SuppressWarnings("EmptyMethod")
 class CommandDefinitionTest {
 
     @Test
