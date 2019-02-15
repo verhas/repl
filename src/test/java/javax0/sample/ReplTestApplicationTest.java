@@ -3,6 +3,8 @@ package javax0.sample;
 import javax0.repl.CommandEnvironment;
 import javax0.repl.Repl;
 
+import java.util.Set;
+
 import static javax0.repl.CommandDefinitionBuilder.start;
 
 class ReplTestApplicationTest {
@@ -25,7 +27,7 @@ class ReplTestApplicationTest {
                 .command(
                         start()
                                 .kw("return")
-                                .parameter("immediate").parameter("delayed").parameter("format")
+                                .parameter("output").parameter("delayed").parameter("text")
                                 .usage("return value")
                                 .help("Use return to calculate a value and return it to the console.")
                                 .executor(this::returnCommand)
@@ -69,19 +71,30 @@ class ReplTestApplicationTest {
     private void myAlias(CommandEnvironment env) {
         env.console().writer().print("This is my alias!!!\n");
         env.console().writer().flush();
-        final var alias = env.parser().get(0);
-        final var command = env.parser().get(1);
+        final var alias = env.parser().get(0).orElse(null);
+        final var command = env.parser().get(1).orElse(null);
         sut.alias(alias, command);
         env.message().info(alias + " was really set to alias " + command);
     }
 
     private void returnCommand(CommandEnvironment env) {
-
+        final var delay = env.parser().get("delayed");
+        if (delay.isPresent()) {
+            try {
+                Thread.sleep(Integer.parseInt(delay.get()));
+            } catch (InterruptedException ignored) {
+            }
+        }
+        final var output = env.parser().get("output", Set.of("yes", "no"));
+        if (output.isPresent() && output.get().equals("yes")) {
+            final var text = env.parser().getOrDefault("text","");
+            env.message().info(text);
+        }
     }
 
     private void echoCommand(CommandEnvironment env) {
         for (int i = 0; env.parser().get(i) != null; i++) {
-            env.message().info(env.parser().get(i));
+            env.message().info(env.parser().get(i).orElse(""));
         }
     }
 

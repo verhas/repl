@@ -136,7 +136,7 @@ public class Repl implements Runnable {
     private void helpCommand(CommandEnvironment env) {
         final var w = env.console().writer();
         if (env.parser().get(0) != null) {
-            final var command = env.parser().get(0);
+            final var command = env.parser().get(0).orElse(null);
             if (aliases.containsKey(command.toLowerCase())) {
                 w.print(command + " is an alias of " + aliases.get(command.toLowerCase()) + "\n");
                 return;
@@ -191,8 +191,8 @@ public class Repl implements Runnable {
     }
 
     private void aliasCommand(CommandEnvironment env) {
-        final var alias = env.parser().get(0);
-        final var command = env.parser().get(1);
+        final var alias = env.parser().get(0).orElse(null);
+        final var command = env.parser().get(1).orElse(null);
         alias(alias, command);
         env.message().info(alias + " was set to alias " + command);
     }

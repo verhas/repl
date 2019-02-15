@@ -220,6 +220,116 @@ alias.
 
 # Command development
 
+## Example 1 with regular expression
+
+Commands are implemented as methods. The sample application in the `test` directory contains a command that calculates
+the absolute value of a complex number. We will have a look at this code as a simple example. This example uses the
+regular expression parsing. The code of this command is the following:
+
+```java
+private void absCommand(CommandEnvironment env) {
+    if (env.matcherId().equals("polar")) {
+        final var abs = Integer.parseInt(env.matcher().group(1));
+        env.message().info("" + abs);
+    } else {
+        final var real = Integer.parseInt(env.matcher().group(1));
+        final var imag = Integer.parseInt(env.matcher().group(2));
+        final var abs = Math.sqrt(real * real + imag * imag);
+        env.message().info("" + abs);
+    }
+}
+```
+The command is defined as
+
+```java
+kw("abs")
+.regex("canonical", "(\\d+)\\s*\\+(\\d+)i")
+.regex("polar", "(\\d+)\\((\\d+\\.?\\d*)\\)")
+.usage("abs complexnumber")
+.help("Print out the absolut value of a complex number\n" +
+        "You can specify the complex number in a+bi format or\n" +
+        "R(rad) format.")
+.executor(this::absCommand)
+```
+
+you can see that instead of parameters the command defines two regular expressions. One of the expressions should
+match the command after the `abs` keyword.
+
+Note that the keyword is not part of the matching string, because it
+is what it alredy is and known to the command code. On the other hand the user can use any alias for the command
+and thus there is no reason to overcomplicate the regular expression.
+
+The two regular expressions are named `polar` and `canonical`. When the command is invoked the name of the expression
+that was matching is provided by the call `env.matcherId()`. The `Matcher` object itself is available through the call
+`env.matcher()` and on this object the method `get(X)` provides the strings that were macthed by the regular expression
+groups enclosed between `(` and `)`.
+
+The output is printed to the console as information message calling `info()` on the message object returned by
+`env.message()`. 
+
+## Example 1 with parameters
+
+Another sample command is `return`. This command prints out a text if the parameter `output` is `yes`. The output
+may be delayed with the parameter `delay`. The code of the command is the following:
+
+```java
+private void returnCommand(CommandEnvironment env) {
+    final var delay = env.parser().get("delayed");
+    if (delay.isPresent()) {
+        try {
+            Thread.sleep(Integer.parseInt(delay.get()));
+        } catch (InterruptedException ignored) {
+        }
+    }
+    final var output = env.parser().get("output", Set.of("yes", "no"));
+    if (output.isPresent() && output.get().equals("yes")) {
+        final var text = env.parser().getOrDefault("text","");
+        env.message().info(text);
+    }
+}
+```
+
+The command is defined as
+
+```java
+kw("return")
+.parameter("output").parameter("delayed").parameter("text")
+.usage("return value")
+.help("Use return to calculate a value and return it to the console.")
+.executor(this::returnCommand)
+```
+
+As you can see there are three parameters configured for the command: `output`, `delayed` and `text`. The parameter
+`delayed` can have any value. If it is not well formatted then the parsing will throw and exception but the command
+itself does not need to care about that. The repl application will catch the exception and display it for the user.
+
+The parameter `output` can have only two values. These can be `yes` and `no`. When the value of the parameter is
+queried these possible values are given in a `Set`. If the parameter has a different value, which is not present in 
+the set then the parsing will throw an exception and the REPL application will handle that. The command code
+can rely on the returned value that it is nothing else but one of the expected string. The user benefits from this
+in the way that the parsing allows for the user to abbreviate these values. In case of our example the `output=yes`
+can also be written as `o=y` as an extremely short form. 
+
+## Command Environment
+
+The command gets a `CommandEnvironment` object. This object can be used to get access to the actual command as the
+use typed it (it is rarely needed), the rest of the line, the parameters, the matchers in case of regular expression
+matching and the concole to output as well as the message object to collect info, warning and error messages. For more
+information please read the JavaDoc documentation of the class `CommandEnvironment` 
+
+# Documentation
+
+You, as a developer of a REPL application want to document your application. This documentation will include the
+text describing the commands. Since the built-in commands provided by the library are not special for the users
+your documentation should include the description of these commands. To eace this task the 
+
+https://github.com/verhas/repl/blob/master/BUILTINS.md
+
+file contains in markdown format the documentation for these commands. You can edit and paste this text into your
+documentation.
+
+
+
 
 
 
