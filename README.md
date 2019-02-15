@@ -11,6 +11,10 @@
 * reads commands from a startup file and executes them automatically
 * provides fluent API to configure the commands of the application using the REPL library
 
+# JavaDoc
+
+For reference the JavaDoc is available at https://verhas.github.io/repl/apidocs/
+
 # Getting started
 
 To start using the library you have to create a simple `public static void main()` that initializes the
