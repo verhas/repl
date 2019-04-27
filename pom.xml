@@ -32,6 +32,11 @@
     </scm>
     <dependencies>
         <dependency>
+            <groupId>org.jline</groupId>
+            <artifactId>jline</artifactId>
+            <version>3.11.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.javax0.geci</groupId>
             <artifactId>javageci-annotation</artifactId>
             <version>1.0.0</version>

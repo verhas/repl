@@ -9,14 +9,27 @@ import java.io.PrintWriter;
 
 public class ConsoleConsole implements LocalConsole {
     final private Console console = System.console();
+    final LocalConsole fallback;
+
+    public ConsoleConsole() {
+        fallback = console != null ? null : new BufferedReaderConsole();
+    }
 
     @Override
     public String readLine(String msg) {
-        return console.readLine(msg);
+        if (console == null) {
+            return fallback.readLine(msg);
+        } else {
+            return console.readLine(msg);
+        }
     }
 
     @Override
     public PrintWriter writer() {
-        return console.writer();
+        if (console == null) {
+            return fallback.writer();
+        } else {
+            return console.writer();
+        }
     }
 }

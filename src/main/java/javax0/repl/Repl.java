@@ -25,6 +25,7 @@ public class Repl implements Runnable {
     private boolean debugMode = false;
     private Consumer<CommandEnvironment> stateReporter;
     private Function<CommandEnvironment, Boolean> allowExit;
+    private LocalConsole console;
 
     /**
      * Create a new object that already has the built-in commands configured.
@@ -60,7 +61,7 @@ public class Repl implements Runnable {
         return process;
     }
 
-    private void shell(String s, LocalConsole console) {
+    private void shell(String s) {
         try {
             if (s.startsWith("cd ")) {
                 console.writer().print("[ERROR] you can not change the working directory\n");
@@ -86,6 +87,7 @@ public class Repl implements Runnable {
      * Switch the Repl into debug mode. In this mode the exceptions are printed to the screen including the stack trace.
      * In non-debug mode only a short information is printed about exceptions that happen during command execution but
      * the code details are not displayed.
+     *
      * @return this
      */
     public Repl debug() {
@@ -98,6 +100,7 @@ public class Repl implements Runnable {
      * {@link CommandDefinitionBuilder} and which implements fluent API to ease the definition of commands.
      * Note that the final {@link CommandDefinitionBuilderReady#build()} method should not be invoked. It will
      * be invoked here by the method.
+     *
      * @param builder the builder that is ready for the building.
      * @return this
      */
@@ -137,12 +140,7 @@ public class Repl implements Runnable {
     }
 
     private LocalConsole getConsole() {
-        if (System.console() == null) {
-            message.warning("No console in the system");
-            return new BufferedReaderConsole();
-        } else {
-            return new ConsoleConsole();
-        }
+        return new JLineConsole(commandDefinitions, aliases.keySet());
     }
 
     private void exitCommand(CommandEnvironment env) {
@@ -197,7 +195,8 @@ public class Repl implements Runnable {
 
     /**
      * Define a new alias
-     * @param alias the name of the alias the user can later use
+     *
+     * @param alias   the name of the alias the user can later use
      * @param command the command that the alias means
      * @return this
      */
@@ -207,12 +206,14 @@ public class Repl implements Runnable {
         } else {
             aliases.put(alias, command);
         }
+        console = getConsole();
         return this;
     }
 
     /**
      * Define a command, which is started after each configured command execution. This command can use the environment
      * console to output information about the state of the application.
+     *
      * @param stateReporter the command implementation
      * @return this
      */
@@ -229,6 +230,7 @@ public class Repl implements Runnable {
      * the application will not exit unless the user specified the {@code confirm=yes} parameter. If this parameter
      * is specified the function is still consulted but its veto (a.k.a. the returned {@code false} value) is ignored
      * and the application will exit.
+     *
      * @param allowExit the function that implements the unsaved resource checking and vetoing
      * @return this
      */
@@ -251,7 +253,7 @@ public class Repl implements Runnable {
             while ((line = reader.readLine()) != null) {
                 if (line.trim().length() > 0) {
                     try {
-                        execute(line, console);
+                        execute(line);
                     } catch (Exception e) {
                         message.error("" + e);
                     }
@@ -278,6 +280,7 @@ public class Repl implements Runnable {
 
     /**
      * Define the prompt that the user will see in the
+     *
      * @param prompt the text of the prompt
      * @return this
      */
@@ -288,6 +291,7 @@ public class Repl implements Runnable {
 
     /**
      * Define the name of the startup file that is executed when the applicatoin starts to run.
+     *
      * @param startupFile the name of the file
      * @return this
      */
@@ -300,7 +304,7 @@ public class Repl implements Runnable {
      * Run the application.
      */
     public void run() {
-        final LocalConsole console = getConsole();
+        console = getConsole();
         final var w = console.writer();
         w.print(fetchMessage());
         if (args != null && args.length > 0) {
@@ -330,12 +334,12 @@ public class Repl implements Runnable {
                 continue;
             }
             if (line.startsWith("!")) {
-                shell(line.substring(1), console);
+                shell(line.substring(1));
                 w.flush();
                 continue;
             }
             try {
-                execute(line, console);
+                execute(line);
             } catch (IllegalArgumentException e) {
                 message.error(e.getMessage());
             } catch (Exception e) {
@@ -365,7 +369,7 @@ public class Repl implements Runnable {
         }
     }
 
-    private void execute(String line, LocalConsole console) {
+    private void execute(String line) {
         final var env = new ReplCommandEnvironment(this);
         env.message = message;
         final String trimmedLine = line.trim();
@@ -374,14 +378,14 @@ public class Repl implements Runnable {
         }
         keywordAndLine(env, trimmedLine);
         seekAlias(env);
-        final var cd = getCommand(env);
-        if (cd == null) {
+        final var comDef = getCommand(env);
+        if (comDef == null) {
             return;
         }
         env.console = console;
-        env.parser = parseLine(env, cd.parameters);
-        if (matchRegexes(env, cd.regexes)) {
-            cd.executor.accept(env);
+        env.parser = parseLine(env, comDef.parameters);
+        if (matchRegexes(env, comDef.regexes)) {
+            comDef.executor.accept(env);
         } else {
             message.error("None of the syntax patterns could match the line. See the help of the command.");
         }
@@ -390,11 +394,11 @@ public class Repl implements Runnable {
         }
     }
 
-    private boolean kwMatch(CommandDefinition cd, String kw) {
-        if (cd.keyword.startsWith("*")) {
-            return cd.keyword.substring(1).toLowerCase().equals(kw);
+    private boolean kwMatch(CommandDefinition comDef, String kw) {
+        if (comDef.keyword.startsWith("*")) {
+            return comDef.keyword.substring(1).toLowerCase().equals(kw);
         }
-        return cd.keyword.toLowerCase().startsWith(kw);
+        return comDef.keyword.toLowerCase().startsWith(kw);
     }
 
     private CommandDefinition getCommand(ReplCommandEnvironment env) {
