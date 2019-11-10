@@ -8,13 +8,14 @@ import org.jline.reader.ParsedLine;
 import org.jline.reader.impl.completer.AggregateCompleter;
 import org.jline.reader.impl.completer.StringsCompleter;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ReplCompleter implements Completer {
+class ReplCompleter implements Completer {
     private Completer completer;
 
     public ReplCompleter(final List<CommandDefinition> commandDefinitions, final Set<String> aliasNames) {
@@ -24,7 +25,7 @@ public class ReplCompleter implements Completer {
     public void setCompleter(final List<CommandDefinition> commandDefinitions, final Set<String> aliasNames) {
         completer = new AggregateCompleter(
             new StringsCompleter(commandDefinitions.stream()
-                .flatMap(c -> Optional.ofNullable(c.parameters).map(p -> p.stream()).orElse(Stream.empty()))
+                .flatMap(c -> Optional.ofNullable(c.parameters).stream().flatMap(Collection::stream))
                 .collect(Collectors.toSet())),
             new StringsCompleter(commandDefinitions.stream()
                 .map(c -> c.keyword.replaceAll("^\\*", "")).collect(Collectors.toSet())),

@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Set;
 
 public class JLineConsole implements LocalConsole {
-    final Terminal terminal;
-    final LocalConsole fallback;
-    final LineReader reader;
+    private final Terminal terminal;
+    private final LocalConsole fallback;
+    private final LineReader reader;
 
     public JLineConsole(List<CommandDefinition> commandDefinitions, Set<String> aliasNames) {
         terminal = getTerminal();
