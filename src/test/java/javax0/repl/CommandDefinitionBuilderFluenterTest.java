@@ -14,10 +14,13 @@ public class CommandDefinitionBuilderFluenterTest {
 
     @Test
     @DisplayName("Fluent API for the CommandDefinitionBuilder is up-to-date")
-    void generateFluendAPI4CommandDefinitionBuilder() throws Exception {
-        if (new Geci().source(maven().mainSource()).register(new Fluent()).generate()) {
-            Assertions.fail(Geci.FAILED);
-        }
+    void generateFluentAPI4CommandDefinitionBuilder() throws Exception {
+        Geci geci;
+        Assertions.assertFalse(
+            (geci = new Geci())
+                .source(maven().mainSource()).register(new Fluent()).generate(),
+            geci.failed()
+        );
     }
 
     public static FluentBuilder sourceBuilderGrammar() {

@@ -10,12 +10,15 @@ import java.io.PrintWriter;
  */
 public class BufferedReaderConsole implements LocalConsole {
     private final BufferedReader reader =
-            new BufferedReader(new InputStreamReader(System.in));
-    private final PrintWriter writer = new PrintWriter(System.out);
+        new BufferedReader(new InputStreamReader(System.in));
+    private final PrintWriter writer =
+        new PrintWriter(System.out);
+
     @Override
     public PrintWriter writer() {
         return writer;
     }
+
     @Override
     public String readLine(String msg) {
         try {

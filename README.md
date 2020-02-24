@@ -3,13 +3,15 @@
 `javax0.repl` is a simple framework to write Read Eval Print Loop type of applications. The library 
 
 * handles the console,
-* parses the line the user types in
-* invokes the methods that implement the individual commands
-* implements commands for `exit`, `alias`, `help`
-* implements OS command execution when the user starts a line with `!`, e.g.: `! ls -l`
-* implements including files like it was typed in when the user starts the line with a dot `. file_name`
-* reads commands from a startup file and executes them automatically
-* provides fluent API to configure the commands of the application using the REPL library
+* it parses the line the user types in,
+* it invokes the methods that implement the individual commands,
+* it implements commands for `exit`, `alias`, `help`,
+* it implements OS command execution when the user starts a line with `!`, e.g.: `! ls -l`,
+* it implements executing commands from a file like it was typed in when the user starts the line with a dot `. file_name`,
+* it can read commands from a startup file and executes them automatically,
+* it provides fluent API to configure the commands of the application using the REPL library.
+
+All the application has to provide is the commads that execute the actual command.
 
 # JavaDoc
 
@@ -19,7 +21,7 @@ For reference, the JavaDoc is available at https://verhas.github.io/repl/index.h
 
 To start using the library you have to create a simple `public static void main()` that initializes the
 structure defining the commands via fluent API and starts the application loop calling `run()` at the end of
-the fluid API chain. A sample application can be found in the test directories of the application in the 
+the fluid API call chain. A sample application can be found in the test directories of the application in the 
 `javax0.repl.sample` package: `ReplTetsApplicationTest` The application contains the following code:
 
 ```java
@@ -129,7 +131,7 @@ and the actual regular expression matcher via `matcher()` on the environment. Th
 parameters.
 
 If none of the regular expressions match then the command is treated as syntactically incorrect, an error is
-displayed by the REPL application and the command is not invoked. 
+displayed by the REPL application, and the command is not invoked. 
 
 ## Usage and help
 
